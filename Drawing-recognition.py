@@ -1,12 +1,11 @@
 from tkinter import *
 from tkinter.colorchooser import askcolor
-from PIL import Image
+from PIL import Image, EpsImagePlugin
 import numpy as np
 import pathlib
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.framework.tensor_shape import as_dimension
-
 
 class Board(object):
 
@@ -85,16 +84,19 @@ class Board(object):
         self.old_x = event.x
         self.old_y = event.y
     
-    # def save(self):
-    #     self.canvas.postscript(file="live.eps")
-    #     saved = Image.open("live.eps")
-    #     saved.save("live.png", "png")
-    #     with Image.open("live.png") as im:
-    #         im.show()
+    def save_as(self):
+        # save postscipt image
+        self.canvas.postscript(file = "temp.eps")
+        # use PIL and ghostscript to convert to PNG
+        EpsImagePlugin.gs_windows_binary =  r"C:\\...\\gs\\gs9.52\bin\\gswin64c"
+        im = Image.open("temp.eps")
+        # out = im.save("temp.png", "PNG")
+        # out.show()
 
     def guess(self):
+        self.save_as
 
-        new_path = pathlib.Path(__file__).with_name("unknown2.png")
+        new_path = pathlib.Path(__file__).with_name("temp.eps")
 
         img = keras.preprocessing.image.load_img(new_path, target_size=(img_height, img_width))
         img_array = keras.preprocessing.image.img_to_array(img)
@@ -107,11 +109,13 @@ class Board(object):
         print(results.values.numpy())
         print(results.indices.numpy())
 
-        # for i in results.indices.numpy():
-        #     print(
-        #         "This image most likely belongs to {} with a {:.2f} percent confidence."
-        #         .format(class_names[i], 100 * results.values.numpy())
-        #     )
+        count = 0
+        for i in results.indices.numpy():
+            print(
+                "This image most likely belongs to {} with a {:.2f} percent confidence."
+                .format(class_names[i], 100 * results.values.numpy()[count])
+            )
+            count += 1
 
     def reset(self, event):
         self.old_x, self.old_y = None, None
