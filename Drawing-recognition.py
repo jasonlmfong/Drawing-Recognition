@@ -103,7 +103,7 @@ class Board(object):
         
         predictions = model.predict(img_array)
         score = tf.nn.softmax(predictions[0])
-        print(score)
+        # print(score)
         results = tf.math.top_k(score, k=3)
         # print(results.values.numpy())
         # print(results.indices.numpy())
@@ -117,7 +117,6 @@ class Board(object):
             top3count += 1
 
         self.count +=1
-        print(self.count)
 
     def reset(self, event):
         self.old_x, self.old_y = None, None
@@ -142,8 +141,8 @@ if __name__ == "__main__":
 
     #separate training set and validation set
     batch_size = 32
-    img_height = 412
-    img_width = 504
+    img_height = 800
+    img_width = 1050
 
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(
         data_dir,
