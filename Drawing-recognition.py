@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter.colorchooser import askcolor
-from PIL import Image, EpsImagePlugin
+from PIL import Image, ImageGrab, EpsImagePlugin
 import numpy as np
 import pathlib
 import tensorflow as tf
@@ -13,30 +13,30 @@ class Board(object):
 
     def __init__(self):
         self.root = Tk()
-        self.root.geometry('1680x980')
+        self.root.geometry("1680x980")
 
-        self.brush_button = Button(self.root, text='Brush', command=self.use_brush)
+        self.brush_button = Button(self.root, text="Brush", command=self.use_brush)
         self.brush_button.grid(row=0, column=1)
 
-        self.eraser_button = Button(self.root, text='Eraser', command=self.use_eraser)
+        self.eraser_button = Button(self.root, text="Eraser", command=self.use_eraser)
         self.eraser_button.grid(row=0, column=2)
 
-        self.guess_button = Button(self.root, text='Guess', command=self.guess)
+        self.guess_button = Button(self.root, text="Guess", command=self.save_guess)
         self.guess_button.grid(row=0, column=3)
 
         self.color_display = Button(self.root, bg = "black", height=2, width=6)
         self.color_display.grid(row=1, column=0)
 
-        self.color_button = Button(self.root, text='Color', command=self.choose_color)
+        self.color_button = Button(self.root, text="Color", command=self.choose_color)
         self.color_button.grid(row=1, column=1)
 
         self.choose_size_button = Scale(self.root, from_=1, to=10, orient=HORIZONTAL)
         self.choose_size_button.grid(row=1, column=2)
 
-        self.clear_button = Button(self.root, text='Clear', command=self.clear)
+        self.clear_button = Button(self.root, text="Clear", command=self.clear)
         self.clear_button.grid(row=1, column=3)
 
-        self.canvas = Canvas(self.root, bg='white', width=1050, height=800)
+        self.canvas = Canvas(self.root, bg="white", width=1050, height=800)
         self.canvas.grid(row=2, columnspan=4)
 
         self.setup()
@@ -49,8 +49,8 @@ class Board(object):
         self.color = "black"
         self.eraser_on = False
         self.active_button = self.brush_button
-        self.canvas.bind('<B1-Motion>', self.draw)
-        self.canvas.bind('<ButtonRelease-1>', self.reset)
+        self.canvas.bind("<B1-Motion>", self.draw)
+        self.canvas.bind("<ButtonRelease-1>", self.reset)
 
     def use_brush(self):
         self.activate_button(self.brush_button)
@@ -68,7 +68,7 @@ class Board(object):
             return None
     
     def clear(self):
-        self.canvas.delete('all')
+        self.canvas.delete("all")
 
     def activate_button(self, some_button, eraser_mode=False):
         self.active_button.config(relief=RAISED)
@@ -78,36 +78,33 @@ class Board(object):
 
     def draw(self, event):
         self.line_width = self.choose_size_button.get()
-        paint_color = 'white' if self.eraser_on else self.color
+        paint_color = "white" if self.eraser_on else self.color
         if self.old_x and self.old_y:
             self.canvas.create_line(self.old_x, self.old_y, event.x, event.y, width=self.line_width, fill=paint_color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
         self.old_x = event.x
         self.old_y = event.y
     
-    def save_as(self):
-        # save postscipt image
-        self.canvas.postscript(file = "temp.eps")
-        # use PIL and ghostscript to convert to PNG
-        EpsImagePlugin.gs_windows_binary =  r"C:\\...\\gs\\gs9.52\bin\\gswin64c"
-        im = Image.open("temp.eps")
-        # out = im.save("temp.png", "PNG")
-        # out.show()
+    def save_guess(self):
+        #save
+        self.canvas.update()
+        x=self.root.winfo_rootx()+self.canvas.winfo_x()
+        y=self.root.winfo_rooty()+self.canvas.winfo_y()
+        x1=x+self.canvas.winfo_width()
+        y1=y+self.canvas.winfo_height()
+        ImageGrab.grab().crop((x,y,x1,y1)).save("temp.png")
 
-    def guess(self):
-        self.save_as
-
-        new_path = pathlib.Path(__file__).with_name("temp.eps")
-
+        #guess
+        new_path = pathlib.Path(__file__).with_name("temp.png")
         img = keras.preprocessing.image.load_img(new_path, target_size=(img_height, img_width))
         img_array = keras.preprocessing.image.img_to_array(img)
         img_array = tf.expand_dims(img_array, 0) # Create a batch
         
         predictions = model.predict(img_array)
         score = tf.nn.softmax(predictions[0])
-
+        print(score)
         results = tf.math.top_k(score, k=3)
-        print(results.values.numpy())
-        print(results.indices.numpy())
+        # print(results.values.numpy())
+        # print(results.indices.numpy())
 
         count = 0
         for i in results.indices.numpy():
@@ -130,11 +127,11 @@ if __name__ == "__main__":
     print(data_dir)
 
     #total images
-    image_count = len(list(data_dir.glob('*/*.png')))
+    image_count = len(list(data_dir.glob("*/*.png")))
     print(image_count)
 
     #show first image
-    # ones = list(data_dir.glob('1/*'))
+    # ones = list(data_dir.glob("1/*"))
     # pic = PIL.Image.open(str(ones[0]))
     # pic.show()
 
@@ -200,22 +197,22 @@ if __name__ == "__main__":
     model = Sequential([
         data_augmentation,
         layers.experimental.preprocessing.Rescaling(1./255),
-        layers.Conv2D(16, 3, padding='same', activation='relu'),
+        layers.Conv2D(16, 3, padding="same", activation="relu"),
         layers.MaxPooling2D(),
-        layers.Conv2D(32, 3, padding='same', activation='relu'),
+        layers.Conv2D(32, 3, padding="same", activation="relu"),
         layers.MaxPooling2D(),
-        layers.Conv2D(64, 3, padding='same', activation='relu'),
+        layers.Conv2D(64, 3, padding="same", activation="relu"),
         layers.MaxPooling2D(),
         layers.Dropout(0.2),
         layers.Flatten(),
-        layers.Dense(128, activation='relu'),
+        layers.Dense(128, activation="relu"),
         layers.Dense(num_classes)
     ])
 
     #model compilation
-    model.compile(optimizer='adam',
+    model.compile(optimizer="adam",
                     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                    metrics=['accuracy'])
+                    metrics=["accuracy"])
 
     #training
     epochs=10
