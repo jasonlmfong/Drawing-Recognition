@@ -1,7 +1,6 @@
 import PIL
 import matplotlib.pyplot as plt
 import numpy as np
-# import PIL
 import tensorflow as tf
 import pathlib
 
@@ -112,7 +111,8 @@ history = model.fit(
     epochs=epochs
 )
 
-model.save("trained model\saved_model")
+# attempt to save the model
+# model.save("trained model\saved_model")
 
 #testing untrained data
 # new_path = pathlib.Path(__file__).with_name("unknown2.png")

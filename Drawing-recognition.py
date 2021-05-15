@@ -39,6 +39,8 @@ class Board(object):
         self.canvas = Canvas(self.root, bg="white", width=1050, height=800)
         self.canvas.grid(row=2, columnspan=4)
 
+        self.count = 0 
+
         self.setup()
         self.root.mainloop()
 
@@ -91,10 +93,10 @@ class Board(object):
         y=self.root.winfo_rooty()+self.canvas.winfo_y()
         x1=x+self.canvas.winfo_width()
         y1=y+self.canvas.winfo_height()
-        ImageGrab.grab().crop((x,y,x1,y1)).save("temp.png")
+        ImageGrab.grab().crop((x,y,x1,y1)).save(f"temp{self.count}.png")
 
         #guess
-        new_path = pathlib.Path(__file__).with_name("temp.png")
+        new_path = pathlib.Path(__file__).with_name(f"temp{self.count}.png")
         img = keras.preprocessing.image.load_img(new_path, target_size=(img_height, img_width))
         img_array = keras.preprocessing.image.img_to_array(img)
         img_array = tf.expand_dims(img_array, 0) # Create a batch
@@ -106,13 +108,16 @@ class Board(object):
         # print(results.values.numpy())
         # print(results.indices.numpy())
 
-        count = 0
+        top3count = 0
         for i in results.indices.numpy():
             print(
                 "This image most likely belongs to {} with a {:.2f} percent confidence."
-                .format(class_names[i], 100 * results.values.numpy()[count])
+                .format(class_names[i], 100 * results.values.numpy()[top3count])
             )
-            count += 1
+            top3count += 1
+
+        self.count +=1
+        print(self.count)
 
     def reset(self, event):
         self.old_x, self.old_y = None, None
