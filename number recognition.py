@@ -1,7 +1,7 @@
 import PIL
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL
+# import PIL
 import tensorflow as tf
 import pathlib
 
@@ -65,11 +65,11 @@ normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
 image_batch, labels_batch = next(iter(normalized_ds))
 first_image = image_batch[0]
 # Notice the pixels values are now in `[0,1]`.
-print(np.min(first_image), np.max(first_image))
+# print(np.min(first_image), np.max(first_image))
 
 
 #number of classes
-num_classes = 2
+num_classes = 10
 
 #augmentation
 data_augmentation = keras.Sequential(
@@ -112,19 +112,25 @@ history = model.fit(
     epochs=epochs
 )
 
+model.save("trained model\saved_model")
+
 #testing untrained data
-new_path = pathlib.Path(__file__).with_name("unknown.png")
+# new_path = pathlib.Path(__file__).with_name("unknown2.png")
 
-img = keras.preprocessing.image.load_img(
-    new_path, target_size=(img_height, img_width)
-)
-img_array = keras.preprocessing.image.img_to_array(img)
-img_array = tf.expand_dims(img_array, 0) # Create a batch
+# img = keras.preprocessing.image.load_img(
+#     new_path, target_size=(img_height, img_width)
+# )
+# img_array = keras.preprocessing.image.img_to_array(img)
+# img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-predictions = model.predict(img_array)
-score = tf.nn.softmax(predictions[0])
+# predictions = model.predict(img_array)
+# score = tf.nn.softmax(predictions[0])
 
-print(
-    "This image most likely belongs to {} with a {:.2f} percent confidence."
-    .format(class_names[np.argmax(score)], 100 * np.max(score))
-)
+# results = tf.math.top_k(score,
+#                         k=3)
+# print(results.values.numpy())
+
+# print(
+#     "This image most likely belongs to {} with a {:.2f} percent confidence."
+#     .format(class_names[np.argmax(score)], 100 * np.max(score))
+# )
