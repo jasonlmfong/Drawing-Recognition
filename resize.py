@@ -2,6 +2,7 @@ from PIL import Image
 import pathlib 
 
 def resize(image):
+    """resize the image inputted, so it matches the image size of our paint application"""
     newimg = image.resize((1050,800))
     return newimg
 

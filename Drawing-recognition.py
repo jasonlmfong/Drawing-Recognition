@@ -9,7 +9,7 @@ from tensorflow.python.framework.tensor_shape import as_dimension
 from parse import parse
 
 class Board(object):
-
+    """the drawing board object"""
     default_brush_size = 5.0
 
     def __init__(self):
@@ -46,6 +46,7 @@ class Board(object):
         self.root.mainloop()
 
     def setup(self):
+        """build hte canvas"""
         self.old_x = None
         self.old_y = None
         self.line_width = self.choose_size_button.get()
@@ -88,7 +89,7 @@ class Board(object):
         self.old_y = event.y
     
     def save_guess(self):
-        #save
+        #save the canvas
         self.canvas.update()
         x=self.root.winfo_rootx()+self.canvas.winfo_x()
         y=self.root.winfo_rooty()+self.canvas.winfo_y()
@@ -96,7 +97,7 @@ class Board(object):
         y1=y+self.canvas.winfo_height()
         ImageGrab.grab().crop((x,y,x1,y1)).save(f"temp{self.count}.png")
 
-        #guess
+        #guess the saved image
         new_path = pathlib.Path(__file__).with_name(f"temp{self.count}.png")
         img = keras.preprocessing.image.load_img(new_path, target_size=(img_height, img_width))
         img_array = keras.preprocessing.image.img_to_array(img)
